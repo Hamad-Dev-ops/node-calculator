@@ -1,0 +1,13 @@
+{
+  "name": "node-calculator",
+  "version": "1.0.0",
+  "description": "A simple calculator app with automated testing",
+  "main": "calculator.js",
+  "scripts": {
+    "test": "jest",
+    "test:coverage": "jest --coverage"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}
