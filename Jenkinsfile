@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'nodejs'  // Must match exactly what you configured in Jenkins
+        nodejs 'nodejs'
     }
 
     parameters {
         string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Git branch to build')
-        string(name: 'BUILD_ENV', defaultValue: 'dev', description: 'Build environment')
-        string(name: 'STUDENT_NAME', defaultValue: 'Hamad Khan', description: 'Student name') // ⚠️ REPLACE WITH YOUR NAME
+        string(name: 'BUILD_ENV', defaultValue: 'dev', description: 'Build environment (dev/test/prod)')
+        string(name: 'STUDENT_NAME', defaultValue: 'Hamad Khan', description: 'Provide your name here. No name, no marks.')
     }
 
     environment {
@@ -26,38 +26,37 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Building Calculator App v${APP_VERSION} on branch ${params.BRANCH_NAME}"
-                echo "Built by: ${params.STUDENT_NAME}"
+                echo "Built by student: ${params.STUDENT_NAME}"
             }
         }
 
         stage('Unit Test') {
             when {
-                expression { return params.BUILD_ENV == 'dev' }
+                expression { params.BUILD_ENV == 'dev' }
             }
             steps {
-                echo 'Running unit tests with Jest...'
+                echo "Running unit tests with Jest..."
                 bat "npm test"
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Simulating deployment of Node.js Calculator App...'
-                echo "Deploying to ${params.BUILD_ENV} environment"
+                echo "Simulating deployment of Node.js Calculator App..."
+                echo "Deploying version ${APP_VERSION} to ${params.BUILD_ENV} environment"
             }
         }
     }
 
     post {
         always {
-            echo 'Cleaning up workspace...'
-            // deleteDir()  // Uncomment if you want to clean workspace
+            echo "Cleaning up workspace..."
         }
         success {
-            echo 'Pipeline executed successfully.'
+            echo "Pipeline executed successfully."
         }
         failure {
-            echo 'Pipeline failed.'
+            echo "Pipeline failed."
         }
     }
 }
