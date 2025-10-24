@@ -1,58 +1,63 @@
 pipeline {
     agent any
-    
+
     tools {
-        nodejs 'nodejs'
+        nodejs 'NodeJS'
     }
-    
+
+    parameters {
+        string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Git branch to build')
+        string(name: 'BUILD_ENV', defaultValue: 'dev', description: 'Build environment (dev/test/prod)')
+        string(name: 'STUDENT_NAME', defaultValue: 'Your Name', description: 'Provide your name here. No name, no marks.')
+    }
+
+    environment {
+        APP_VERSION = "1.0.0"
+    }
+
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main', 
-                url: 'https://github.com/YOUR_USERNAME/node-calculator.git'
-            }
-        }
-        
         stage('Install Dependencies') {
             steps {
-                bat 'npm install'
+                echo "Installing Node.js dependencies..."
+                bat "npm install"
             }
         }
-        
-        stage('Run Tests') {
+
+        stage('Build') {
             steps {
-                bat 'npm test'
+                echo "Building Calculator App v${APP_VERSION} on branch ${params.BRANCH_NAME}"
+                bat "npm run build"
             }
         }
-        
-        stage('Test Coverage') {
-            steps {
-                bat 'npm run test:coverage'
+
+        stage('Unit Test') {
+            when {
+                expression { params.BUILD_ENV == 'dev' }
             }
-            post {
-                always {
-                    publishHTML target: [
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: false,
-                        keepAll: true,
-                        reportDir: 'coverage/lcov-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Jest Coverage Report'
-                    ]
-                }
+            steps {
+                echo "Running unit tests with Jest..."
+                bat "npm test"
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo "Simulating deployment of Node.js Calculator App..."
+                bat "echo Deploying version ${APP_VERSION} for ${params.BUILD_ENV} environment"
             }
         }
     }
-    
+
     post {
         always {
-            echo "Build Result: ${currentBuild.result}"
+            echo "Cleaning up workspace..."
+            // deleteDir()  // uncomment if cleanup is required
         }
         success {
-            echo '🎉 Build and tests completed successfully!'
+            echo "Pipeline executed successfully."
         }
         failure {
-            echo '❌ Build or tests failed!'
+            echo " Pipeline failed."
         }
     }
 }
